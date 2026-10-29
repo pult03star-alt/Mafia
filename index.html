@@ -1,0 +1,267 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090909"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Mafia Night"><link rel="manifest" href="manifest.webmanifest"><title>Mafia Night</title><style>
+:root{--r:#ef233c;--p:#151112;--l:#48202a}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#321017,#090909 55%);color:#f7f7f7;font:16px system-ui}header{text-align:center;padding:22px;border-bottom:1px solid var(--l);position:sticky;top:0;background:#090909eF}.logo{font-size:32px;font-weight:900;letter-spacing:2px}.logo span{color:var(--r)}main{max-width:760px;margin:auto;padding:14px;display:grid;gap:14px}.card{background:linear-gradient(145deg,#191919,#100d0e);border:1px solid var(--l);border-radius:16px;padding:16px}h2{font-size:19px;margin:0 0 12px}p,small{color:#aaa}button,input,select{font:inherit;border-radius:10px}button{background:#260e13;border:1px solid #7b1d2a;color:white;padding:12px;cursor:pointer}button.primary{background:var(--r);border-color:var(--r)}input,select{background:#080808;border:1px solid #493038;color:white;padding:12px;width:100%;margin:6px 0 12px}.row{display:flex;gap:9px;flex-wrap:wrap}.row>*{flex:1}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.capacity{margin:14px 0 8px}.capacity-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;color:#c9bfc1}.capacity-head strong{font-size:14px;color:#fff}.capacity-track{height:12px;width:100%;overflow:hidden;border-radius:999px;background:linear-gradient(180deg,#292326,#171416);border:1px solid #403036;box-shadow:inset 0 1px 3px #0009}.capacity-fill{height:100%;width:12.5%;border-radius:999px;background:linear-gradient(90deg,#a9162a,#ef4457 70%,#ff7a87);box-shadow:0 0 10px #ef233c55;transition:width .35s ease}.capacity-hint{font-size:12px;color:#82777a;margin-top:6px}.role-settings{display:grid;gap:10px;margin:14px 0}.role-option{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0c0c0c;border:1px solid #382329;border-radius:10px;padding:11px}.role-option input{width:auto;margin:0;accent-color:var(--r)}.role-option small{display:block;margin-top:3px}.player{display:flex;align-items:center;gap:8px;background:#0c0c0c;border:1px solid #382329;border-radius:10px;padding:10px}.avatar{font-size:22px;background:#351018;border-radius:50%;padding:7px}.hidden{display:none!important}.notice{padding:12px;border-left:3px solid var(--r);background:#250e13;border-radius:8px}.chat{height:170px;overflow:auto;background:#080808;border:1px solid #382329;border-radius:10px;padding:10px}.msg{background:#191919;padding:9px;margin:6px 0;border-radius:8px}.system{border:1px solid #70202c}.toggle{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #382329}.toggle input{width:auto;accent-color:var(--r)}footer{text-align:center;color:#777;font-size:12px;padding:20px}@media(max-width:500px){.grid{grid-template-columns:1fr}}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#080808f2;border-top:1px solid #48202a;backdrop-filter:blur(12px)}
+.bottom-nav button{flex:1;border-radius:13px;padding:12px}.bottom-nav button.active{background:#ef233c;border-color:#ef233c}
+body{padding-bottom:82px}.modal-backdrop{position:fixed;inset:0;background:#000b;z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.modal{width:min(100%,600px);max-height:82vh;overflow:auto;background:#151112;border:1px solid #70202c;border-radius:20px 20px 14px 14px;padding:18px;box-shadow:0 20px 70px #000}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.modal-head h2{margin:0}.modal .grid{margin:14px 0}.dead{opacity:.35;filter:grayscale(1)}.dead small{color:#ff6676}.icon-btn{padding:8px 12px}.role-action{border:1px solid #70202c;background:#210d11;border-radius:14px;padding:14px;margin-top:12px}
+</style><header><div class="logo">MAFIA <span>NIGHT</span></div><small>Mafia Night • роли и личные каналы</small></header><main>
+<section class="card" id="home"><h2>🎮 Игра</h2><p>Создай комнату или присоединись к друзьям. После начала партии откроются чат и таблица игроков.</p>
+<label>Твой никнейм</label><input id="nick" maxlength="18" placeholder="Например, Кирилл">
+<div class="row"><button class="primary" id="create">＋ Создать новую комнату</button><button id="join">Войти по коду</button></div>
+<div class="notice" style="margin-top:12px">Сначала собираемся в комнате. Чат и список игроков появятся после кнопки «Начать игру».</div></section>
+<section class="card hidden" id="lobby"><div class="row" style="align-items:center"><div><h2>Комната <span id="code"></span></h2><small>Игроков: <span id="count">1</span>/<span id="maxCount">8</span></small></div><span class="avatar">🔴</span></div>
+<div class="capacity"><div class="capacity-head"><span>Заполнение комнаты</span><strong><span id="countLabel">1</span> из <span id="maxLabel">8</span> игроков</strong></div><div class="capacity-track" role="progressbar" aria-label="Заполнение комнаты" aria-valuemin="1" aria-valuemax="10" aria-valuenow="1" id="capacityTrack"><div class="capacity-fill" id="capacityFill"></div></div><div class="capacity-hint" id="capacityHint">Ещё можно пригласить 7 игроков</div></div><h2>Размер компании</h2><label for="playerLimit">Сколько всего игроков будет играть?</label><select id="playerLimit"><option value="5">5 игроков</option><option value="6">6 игроков</option><option value="7">7 игроков</option><option value="8" selected>8 игроков</option><option value="9">9 игроков</option><option value="10">10 игроков</option></select><h2>Состав ролей</h2><div class="role-settings"><div class="role-option"><span>🔪 Вторая мафия<small>Можно отключить полностью</small></span><input type="checkbox" id="secondMafia" checked></div><div class="role-option"><span>💋 Любовница<small>Можно отключить полностью</small></span><input type="checkbox" id="includeLover" checked></div><div class="role-option"><span>🕵️ Комиссар<small>Обязательная роль · 1 игрок</small></span><input type="checkbox" checked disabled aria-label="Комиссар обязателен"></div><div class="role-option"><span>🩺 Доктор<small>Обязательная роль · 1 игрок</small></span><input type="checkbox" checked disabled aria-label="Доктор обязателен"></div><div class="role-option"><span>🔪 Мафия<small>Обязательная роль · минимум 1 игрок</small></span><input type="checkbox" checked disabled aria-label="Мафия обязательна"></div></div><div class="notice" id="roleSummary">Роли распределяются автоматически.</div><p>Позови друзей по коду или ссылке. Свободные места займут боты. Настройки и запуск доступны только хосту.</p>
+<div class="row"><button id="copycode">Копировать код</button><button id="copylink">Копировать ссылку</button></div>
+<h2 style="margin-top:18px">Участники комнаты</h2><div class="grid" id="players"></div>
+<div class="row" style="margin-top:12px"><button class="primary" id="start">Начать игру</button></div></section>
+<section class="card hidden" id="game"><div class="row" style="align-items:center;justify-content:space-between"><h2 id="phase">Ночь 1</h2><span class="badge">MAFIA NIGHT</span></div>
+<div class="notice" id="role">Твоя роль появится здесь.</div>
+<div class="row" style="margin-top:14px"><button id="openChat">💬 Общий чат · всегда</button><button id="openPrivate">🔒 Мой личный канал · всегда</button><button id="openPlayers">👥 Игроки</button></div>
+<div id="actions"></div>
+<div class="notice" style="margin-top:14px">Игра началась. Открой чат для обсуждения или список игроков для выбора цели, если твоя роль это позволяет.</div></section>
+<section class="card hidden" id="settings"><h2>⚙️ Настройки</h2><div class="toggle"><label>Голосовой ведущий</label><input type="checkbox" id="voice"></div><label>Голос ведущего</label><select id="gender"><option value="male">Мужской</option><option value="female">Женский</option></select><div class="toggle"><label>Озвучивать только важные события</label><input type="checkbox" id="important" checked></div><div class="toggle"><label>Фоновая музыка отключена</label><input type="checkbox" checked disabled></div><div class="toggle"><label>Звуки интерфейса</label><input type="checkbox" checked></div><button id="test">▶ Проверить голос</button></section></main>
+<nav class="bottom-nav"><button id="navGame" class="active">🎮 Игра</button><button id="navSettings">⚙️ Настройки</button></nav>
+<div id="overlay" class="modal-backdrop hidden"><section class="modal"><div class="modal-head"><h2 id="modalTitle">Окно</h2><button class="icon-btn" id="closeModal">✕</button></div><div id="modalBody"></div></section></div>
+<footer>Mafia Night • онлайн-бета</footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const baseRoles=[['🔪','Убийца','mafia'],['🕵️','Комиссар','town'],['🩺','Доктор','town']];
+let people=[],room='',mine=null,phaseStarted=false,privateMessages=[],chatMessages=[];
+function targetCount(){return Number($('playerLimit').value)}
+function configuredRoles(){let r=[...baseRoles];if($('secondMafia').checked)r.push(['🔪','Второй убийца','mafia']);if($('includeLover').checked)r.push(['💋','Любовница','town']);while(r.length<targetCount())r.push(['👤','Мирный житель','town']);return r}
+function updateRoleSummary(){let n=targetCount(),r=configuredRoles(),citizens=r.filter(x=>x[1]==='Мирный житель').length;$('roleSummary').innerHTML=`На ${n} игроков: 1 мафия, ${$('secondMafia').checked?'1 вторая мафия':'без второй мафии'}, 1 комиссар, 1 доктор, ${$('includeLover').checked?'1 любовница':'без любовницы'}, ${citizens} ${citizens===1?'мирный житель':citizens>=2&&citizens<=4?'мирных жителя':'мирных жителей'}.`;}
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function show(id){$(id).classList.remove('hidden')}function hide(id){$(id).classList.add('hidden')}
+async function copyText(t){try{await navigator.clipboard.writeText(t);alert('Скопировано!')}catch(e){prompt('Скопируй текст:',t)}}
+$('copycode').onclick=()=>copyText(room);
+$('copylink').onclick=()=>copyText(location.href.split('?')[0]+'?room='+encodeURIComponent(room));
+function speak(t){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';let vs=speechSynthesis.getVoices();let rx=$('gender').value==='female'?/female|woman|zira|samantha|victoria|karen/i:/male|david|alex/i;u.voice=vs.find(v=>rx.test(v.name))||vs.find(v=>v.lang.toLowerCase().startsWith('ru'))||null;speechSynthesis.speak(u)}
+function addChatMessage(text,system=false){if(db&&code)REF('chat').push({text,system,ts:Date.now()})}
+function announce(t){addChatMessage('🤖 ИИ-ведущий: '+t,true);if($('voice').checked)speak(t)}
+function renderChat(){return chatMessages.map(m=>`<div class="msg ${m.system?'system':''}">${esc(m.text)}</div>`).join('')||'<div class="msg system">ИИ-ведущий: Добро пожаловать в игру.</div>'}
+function sendChatMessage(){let input=$('modalMessage');if(!input)return;if(myDead()){alert('Выбывшие игроки не могут писать в общий чат.');return}let t=input.value.trim();if(!t)return;addChatMessage(($('nick').value.trim()||'Игрок')+': '+t);input.value='';let chat=$('modalChat');if(chat){chat.innerHTML=renderChat();chat.scrollTop=chat.scrollHeight}input.focus()}
+function openModal(title,body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;show('overlay')}
+function closeModal(){hide('overlay')}
+$('closeModal').onclick=closeModal;$('overlay').onclick=e=>{if(e.target===$('overlay'))closeModal()};
+function openChat(){openModal('💬 Общий чат',`<div class="chat" id="modalChat">${renderChat()}</div><div class="row" style="margin-top:10px"><input id="modalMessage" maxlength="300" placeholder="Написать сообщение..." aria-label="Сообщение в общий чат"><button id="modalSend" class="primary">Отправить</button></div><small>Сообщения видны всем игрокам комнаты. Выбывшие игроки писать не могут.</small>`);$('modalSend').onclick=sendChatMessage;$('modalMessage').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();sendChatMessage()}};$('modalMessage').focus();let c=$('modalChat');c.scrollTop=c.scrollHeight}
+function privateTitle(){if(!mine)return '🔒 Личный канал';if(mine[2]==='mafia')return '🔪 Секретный чат мафии';if(mine[1]==='Комиссар')return '🕵️ Личный канал комиссара';if(mine[1]==='Доктор')return '🩺 Личный канал доктора';if(mine[1]==='Любовница')return '💋 Личный канал любовницы';return '🔒 Личный канал'}
+function openPrivate(){
+ if(!mine){openModal('🔒 Личный канал','<div class="notice">Личный канал появится после начала партии и назначения роли.</div>');return}
+ let msgs=privateMessages.length?privateMessages.map(m=>`<div class="msg ${m.system?'system':''}">${esc(m.text)}</div>`).join(''):'<div class="msg system">ИИ-ведущий: Личный канал доступен в течение всей партии. Здесь показываются только сообщения и результаты, предназначенные твоей роли.</div>';
+ let extra='';
+ if(mine[2]==='mafia') {
+   extra='<div class="role-action"><b>Секретный канал мафии</b><p>Этот канал видят только мафиози.</p><div class="row"><input id="privateInput" maxlength="300" placeholder="Написать напарнику"><button id="privateSend" class="primary">Отправить</button></div></div>';
+ } else if(['Комиссар','Доктор','Любовница'].includes(mine[1])) {
+   extra='<div class="role-action"><b>Личный канал: '+esc(mine[1])+'</b><p>Можно писать заметки и сообщения в свой канал. Они не запускают игровые действия — способности выбираются отдельно через окно «Игроки».</p><div class="row"><input id="privateInput" maxlength="300" placeholder="Написать в личный канал"><button id="privateSend" class="primary">Отправить</button></div></div>';
+ } else {
+   extra='<div class="role-action"><b>Мирный житель</b><p>У мирных жителей нет отдельного чата между собой. Для обсуждения используй общий чат.</p></div>';
+ }
+ openModal(privateTitle(),`<div class="chat" id="privateChat">${msgs}</div>${extra}<p><small>Текст в чате никогда не выполняет игровые действия. Чтобы выбрать цель, открой «Игроки» и подтверди действие в отдельном окне.</small></p>`);
+ if($('privateSend')) {
+   const sendPrivate=()=>{let input=$('privateInput');let t=input.value.trim();if(!t)return;sendPrivateMsg(t);input.value=''};
+   $('privateSend').onclick=sendPrivate;
+   $('privateInput').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();sendPrivate()}};
+   $('privateInput').focus();
+ }
+}
+
+function refreshChat(){const c=$('modalChat');if(c){c.innerHTML=renderChat();c.scrollTop=c.scrollHeight}}
+const CFG={apiKey:"AIzaSyBeqAnSvz-tmJ57nVntr3203IR-4scJF_w",authDomain:"mafia-night-c5c23.firebaseapp.com",databaseURL:"https://mafia-night-c5c23-default-rtdb.europe-west1.firebasedatabase.app",projectId:"mafia-night-c5c23",appId:"1:752432609231:web:8c57ad96c6d30bc31a04ba"};
+const ACT_ROLES=['Убийца','Второй убийца','Комиссар','Доктор','Любовница'],ICONS=['🙂','😎','🤠','🧐','😼','🦉'];
+let db=null,uid='',code='',isHost=false,hostInit=0,S=null,M={},L={},R=null,A=null,V=null,G=null,myIdx=-1,unsubs=[],openedVote=0,cm0=0,pm={},mm={};
+try{firebase.initializeApp(CFG);db=firebase.database()}catch(e){}
+try{uid=sessionStorage.mn_uid||(sessionStorage.mn_uid=Math.random().toString(36).slice(2,10))}catch(e){uid=Math.random().toString(36).slice(2,10)}
+const REF=p=>db.ref('rooms/'+code+(p?'/'+p:''));
+const on=(p,fn)=>{const r=REF(p);r.on('value',s=>fn(s.val()));unsubs.push(r)};
+const list=o=>Object.values(o||{}).sort((a,b)=>(a.ts||0)-(b.ts||0));
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const myDead=()=>S&&myIdx>=0&&!S.players[myIdx].alive&&S.phase!=='over';
+const box=(t,b,n)=>`<div class="role-action"><b>${t}</b>${b?'<p>'+b+'</p>':''}${n?'<div class="notice">'+n+'<span id="cd"></span></div>':''}</div>`;
+setInterval(()=>{const e=$('cd');if(e&&S&&S.end)e.textContent=' · осталось '+Math.max(0,Math.round((S.end-Date.now())/1000))+' с'},1000);
+
+function renderLobby(){
+ const ps=Object.entries(L).sort((a,b)=>a[1].t-b[1].t),n=ps.length,limit=M.limit||8,left=Math.max(0,limit-n);
+ $('count').textContent=n;$('countLabel').textContent=n;$('maxCount').textContent=limit;$('maxLabel').textContent=limit;
+ $('capacityFill').style.width=Math.min(100,n/limit*100)+'%';$('capacityTrack').setAttribute('aria-valuenow',n);
+ $('capacityHint').textContent=left?'Свободных мест: '+left+'. Если никто не придёт, их займут боты.':'Комната заполнена — можно начинать игру';
+ $('players').innerHTML=ps.map(([id,p])=>`<div class="player"><span class="avatar">${p.icon}</span><span>${esc(p.name)}<small>${id===uid?'Это ты':'В комнате'}${id===M.host?' · хост':''}</small></span></div>`).join('');
+ updateRoleSummary()}
+function enterRoom(c){
+ code=c;room=c;S=null;R=null;A=null;V=null;M={};L={};openedVote=0;cm0=-1;hostInit=0;mine=null;chatMessages=[];privateMessages=[];
+ $('code').textContent=c;hide('home');hide('game');show('lobby');
+ on('m',v=>{M=v||{};isHost=M.host===uid;$('playerLimit').value=M.limit||8;$('secondMafia').checked=!!M.second;$('includeLover').checked=!!M.lover;
+  ['playerLimit','secondMafia','includeLover'].forEach(i=>$(i).disabled=!isHost);$('start').style.display=isHost?'':'none';renderLobby();
+  if(isHost&&!hostInit){hostInit=1;on('acts',hostActs);on('votes',hostVotes)}});
+ on('lobby',v=>{L=v||{};renderLobby()});
+ on('s',v=>{S=v;render()});on('roles/'+uid,v=>{R=v;render()});on('acts/'+uid,v=>{A=v;render()});on('votes/'+uid,v=>{V=v;render()});
+ on('chat',v=>{const l=list(v);if(cm0>=0)l.slice(cm0).forEach(m=>{if(m.system&&$('voice').checked)speak(m.text.replace('🤖 ИИ-ведущий: ',''))});cm0=l.length;chatMessages=l;refreshChat()});
+ on('mchat',v=>{mm=v||{};mergePriv()});on('priv/'+uid,v=>{pm=v||{};mergePriv()})}
+function leaveRoom(){unsubs.forEach(r=>r.off());unsubs=[];if(G){clearTimeout(G.tm);clearInterval(G.talk)}G=null;S=null;mine=null;code='';room='';privateMessages=[];chatMessages=[];hide('game');hide('lobby');show('home');window.scrollTo({top:0,behavior:'smooth'})}
+$('create').onclick=async()=>{
+ if(!db){alert('Нет связи с Firebase. Проверь интернет и перезагрузи страницу.');return}
+ const nick=$('nick').value.trim();if(!nick){alert('Введи никнейм');return}
+ for(let k=0;k<5;k++){const c='MN-'+Math.floor(1000+Math.random()*9000);code=c;
+  if(!(await REF('m').once('value')).val()){await REF().set({m:{host:uid,limit:8,second:true,lover:true,status:'lobby'},lobby:{[uid]:{name:nick,icon:rnd(ICONS),t:Date.now()}}});enterRoom(c);return}}
+ code='';alert('Не удалось создать комнату, попробуй ещё раз')};
+async function joinRoom(c){
+ if(!db){alert('Нет связи с Firebase. Проверь интернет и перезагрузи страницу.');return}
+ const nick=$('nick').value.trim();if(!nick){alert('Сначала введи никнейм');return}
+ c=c.trim().toUpperCase();if(/^\d+$/.test(c))c='MN-'+c;code=c;
+ const m=(await REF('m').once('value')).val(),lob=(await REF('lobby').once('value')).val()||{};
+ if(!m){code='';alert('Комната не найдена');return}
+ if(m.status==='play'&&!lob[uid]){code='';alert('Игра в этой комнате уже началась');return}
+ if(!lob[uid]&&Object.keys(lob).length>=m.limit){code='';alert('Комната заполнена');return}
+ if(!lob[uid])await REF('lobby/'+uid).set({name:nick,icon:rnd(ICONS),t:Date.now()});
+ enterRoom(c)}
+$('join').onclick=()=>{const c=prompt('Введи код комнаты, например MN-4827',new URLSearchParams(location.search).get('room')||'');if(c)joinRoom(c)};
+const setMeta=()=>{if(isHost&&db&&code)REF('m').update({limit:+$('playerLimit').value,second:$('secondMafia').checked,lover:$('includeLover').checked})};
+$('playerLimit').onchange=setMeta;$('secondMafia').onchange=setMeta;$('includeLover').onchange=setMeta;
+function mergePriv(){
+ privateMessages=[...list(pm),...(mine&&mine[2]==='mafia'?list(mm):[])].sort((a,b)=>(a.ts||0)-(b.ts||0));
+ const c=$('privateChat');if(c){c.innerHTML=privateMessages.map(m=>`<div class="msg ${m.system?'system':''}">${esc(m.text)}</div>`).join('');c.scrollTop=c.scrollHeight}}
+function sendPrivateMsg(t){const m={text:($('nick').value.trim()||'Ты')+': '+t,ts:Date.now()};if(mine&&mine[2]==='mafia')REF('mchat').push(m);else REF('priv/'+uid).push(m)}
+function privateNotice(id,text){REF('priv/'+id).push({text:'🤖 ИИ-ведущий (лично): '+text,system:true,ts:Date.now()})}
+function renderRole(){
+ if(!R)return;mine=R;
+ $('role').innerHTML=`<b>${R[0]} Твоя роль: ${R[1]}</b><br>${R[2]==='mafia'?'Ты играешь за мафию. Напарник и секретный чат — в «Моём личном канале».':'Твоя задача — помочь городу.'}`;mergePriv()}
+
+function render(){
+ if(!S)return;
+ myIdx=S.players.findIndex(p=>p.id===uid);
+ if($('game').classList.contains('hidden')){if(myIdx<0)return;hide('home');hide('lobby');show('game');$('game').scrollIntoView({behavior:'smooth'})}
+ $('phase').textContent=S.label;renderRole();
+ const me=S.players[myIdx];if(!me)return;let h='';
+ if(S.phase==='over')h=box('🏆 '+esc(S.res||'Игра окончена'),'<small>Роли в этой партии:<br>'+S.reveal.map(esc).join('<br>')+'</small>')+'<button class="primary" id="backToLobby">Выйти в меню</button>';
+ else if(isHost&&!G)h=box('⚠️ Ведущий потерял партию','Страница хоста была перезагружена. Создайте новую комнату.');
+ else if(S.phase==='night'){const done=A&&A.d===S.day,can=me.alive&&mine&&ACT_ROLES.includes(mine[1]);
+  h=box('🌙 Ночь '+S.day,!me.alive?'Ты выбыл и наблюдаешь за партией.':can?(mine[1]==='Комиссар'?'Открой «Игроки» и выбери, кого проверить.':'Открой «Игроки» и выбери цель для ночного действия.'):'У тебя нет ночного действия. Ты спишь.',done?'🌙 Выбор принят. Ждём остальных…':can?'Ожидание твоего выбора…':'Ночь идёт…')}
+ else if(S.phase==='discussion')h=box('🌅 День '+S.day+' — обсуждение','Обсуждайте в общем чате, кто мог это сделать.','💬 Обсуждение')+'';
+ else if(S.phase==='voting')h=me.alive?(V==null?box('🗳️ Голосование','Выбери подозреваемого.')+'<button class="primary" id="voteBtn">Открыть голосование</button>':box('🗳️ Голосование','Твой голос принят. Ждём остальных.','Голосование')):box('🗳️ Голосование','Ты выбыл и наблюдаешь.','Голосование');
+ else h=box(esc(S.label),'','Скоро продолжение…');
+ $('actions').innerHTML=h;
+ if($('backToLobby'))$('backToLobby').onclick=leaveRoom;
+ if($('voteBtn'))$('voteBtn').onclick=openVote;
+ if(S.phase==='voting'&&me.alive&&V==null&&openedVote!==S.day){openedVote=S.day;openVote()}}
+
+function playerTable(){
+ if(!S||!mine){openModal('👥 Игроки','<div class="notice">Список появится после начала партии.</div>');return}
+ openModal('👥 Игроки',`<p>Выбирай только живых участников. Роли остальных скрыты.</p><div class="grid">${S.players.map((p,i)=>{
+  const me=i===myIdx,selfOk=me&&mine[1]==='Доктор',off=!p.alive||(me&&!selfOk);
+  return `<button class="player ${p.alive?'':'dead'}" data-person="${i}" ${off?'disabled':''}><span class="avatar">${p.icon}</span><span>${esc(p.name)}<small>${me?(selfOk?'Это ты (можно защитить себя)':'Это ты'):!p.alive?'Выбыл из игры':'Живой игрок'}</small></span></button>`}).join('')}</div>`);
+ $('modalBody').querySelectorAll('[data-person]').forEach(b=>b.onclick=()=>{const i=+b.dataset.person;closeModal();act(i)})}
+$('openChat').onclick=openChat;$('openPrivate').onclick=openPrivate;$('openPlayers').onclick=playerTable;
+function act(i){
+ if(!S||myIdx<0||!mine)return;const p=S.players[i],me=S.players[myIdx];
+ if(S.phase!=='night'){openModal('⏳ Не сейчас','<div class="notice">Способности работают только ночью.</div>');return}
+ if(A&&A.d===S.day){openModal('✅ Уже сделано','<div class="notice">Ты уже использовал способность этой ночью.</div>');return}
+ if(!p||!p.alive||!me.alive||!ACT_ROLES.includes(mine[1]))return;
+ if(i===myIdx&&mine[1]!=='Доктор')return;
+ const r=mine[1],what=r==='Доктор'?'защиту':r==='Любовница'?'отвлечение':r==='Комиссар'?'проверку':'ночную цель';
+ openModal('🌙 Подтвердить действие',`<p>Выбран игрок: <b>${esc(p.name)}</b></p><div class="notice">Подтвердить ${what} игрока ${esc(p.name)}?</div><button class="primary" id="confirm">Подтвердить выбор</button>`);
+ $('confirm').onclick=()=>{if(S.phase!=='night')return;REF('acts/'+uid).set({d:S.day,t:i,ts:Date.now()});closeModal();openPrivate()}}
+function openVote(){
+ if(!S||S.phase!=='voting'||myIdx<0||!S.players[myIdx].alive)return;
+ openModal('🗳️ Голосование','<p>Выбери, кого город считает подозреваемым.</p><div class="grid">'+S.players.map((p,i)=>p.alive&&i!==myIdx?`<button class="player" data-vote="${i}"><span class="avatar">${p.icon}</span><span>${esc(p.name)}<small>Проголосовать</small></span></button>`:'').join('')+'</div><p><small>Боты голосуют автоматически. При ничьей никто не выбывает.</small></p><button id="skipVote">Воздержаться</button>');
+ const cast=i=>{if(S&&S.phase==='voting'){REF('votes/'+uid).set(i);closeModal()}};
+ $('modalBody').querySelectorAll('[data-vote]').forEach(b=>b.onclick=()=>cast(+b.dataset.vote));$('skipVote').onclick=()=>cast(-1)}
+
+/* ===== ДВИЖОК ХОСТА ===== */
+const ro=i=>G.roles[G.players[i].id],rno=i=>ro(i)[1],isMi=i=>ro(i)[2]==='mafia',nm=i=>G.players[i].name;
+const alv=()=>G.players.map((p,i)=>i).filter(i=>G.players[i].alive);
+const note=(i,t)=>{if(!G.players[i].bot)privateNotice(G.players[i].id,t)};
+function pub(){REF('s').set({phase:G.phase,day:G.day,label:G.label,end:G.end||0,players:G.players,res:G.res||'',reveal:G.reveal||[]})}
+$('start').onclick=()=>{if(isHost&&db&&code)hostStart()};
+function hostStart(){
+ const hs=Object.entries(L).sort((a,b)=>a[1].t-b[1].t).map(([id,v])=>({id,name:v.name,icon:v.icon,alive:true}));
+ const n=+$('playerLimit').value,names=['Алекс','Максим','Кирилл','Дима','Саша','Артём','Миша','Илья','Рома'],ic=['🕶️','🎭','🦊','🐺','🧢'];
+ let b=0;while(hs.length<n){hs.push({id:'b'+b,name:names[b%names.length],icon:ic[b%5],alive:true,bot:true});b++}
+ const rr=configuredRoles().sort(()=>Math.random()-.5);
+ G={players:hs,roles:{},day:1,run:0,phase:'',label:'',night:{},need:[],vneed:[],tm:null,talk:null,end:0,res:'',reveal:null};
+ hs.forEach((p,i)=>G.roles[p.id]=rr[i]);
+ ['chat','mchat','priv','votes','acts','roles'].forEach(k=>REF(k).remove());
+ hs.filter(p=>!p.bot).forEach(p=>REF('roles/'+p.id).set(G.roles[p.id]));
+ REF('m/status').set('play');
+ const hints={'Убийца':'Ты в команде мафии. Каждую ночь выбирай жертву через «Игроки».','Второй убийца':'Ты в команде мафии. Каждую ночь выбирай жертву через «Игроки».','Комиссар':'Каждую ночь можешь проверить одного игрока. Результат увидишь только ты.','Доктор':'Каждую ночь защищай одного игрока (можно себя). Если мафия выберет его — он выживет.','Любовница':'Каждую ночь отвлекай одного игрока: его ночное действие сорвётся.'};
+ hs.forEach((p,i)=>{if(p.bot)return;const r=G.roles[p.id];note(i,hints[r[1]]||'Ты мирный житель. Для обсуждения используй общий чат.');
+  if(r[2]==='mafia'){const mt=hs.find(q=>q.id!==p.id&&G.roles[q.id][2]==='mafia');note(i,'Твой напарник: '+(mt?mt.name:'нет, ты один в мафии')+'. Здесь же работает секретный чат мафии.')}});
+ beginNight()}
+function beginNight(){
+ const id=++G.run;G.phase='night';G.label='Ночь '+G.day;G.night={kill:null,killer:null,heal:null,block:null,acts:{}};
+ announce('🌙 Ночь '+G.day+'. Город засыпает. Мафия просыпается.');
+ const al=alv(),bots=al.filter(i=>G.players[i].bot);
+ if(!al.some(i=>!G.players[i].bot&&isMi(i))){const k=bots.find(isMi);if(k!==undefined){G.night.kill=rnd(al.filter(i=>!isMi(i)));G.night.killer=k}}
+ if(bots.some(i=>rno(i)==='Доктор'))G.night.heal=rnd(al);
+ const lv=bots.find(i=>rno(i)==='Любовница');if(lv!==undefined)G.night.block=rnd(al.filter(i=>i!==lv));
+ G.need=al.filter(i=>!G.players[i].bot&&ACT_ROLES.includes(rno(i)));
+ G.end=Date.now()+(G.need.length?45000:4000);REF('acts').remove();pub();
+ clearTimeout(G.tm);G.tm=setTimeout(()=>{if(G&&G.run===id)resolveNight()},G.need.length?45000:4000)}
+function hostActs(a){
+ if(!G||G.phase!=='night')return;let ch=false;
+ Object.entries(a||{}).forEach(([id,x])=>{
+  if(G.night.acts[id]||x.d!==G.day)return;
+  const i=G.players.findIndex(p=>p.id===id),t=x.t;
+  if(i<0||!G.need.includes(i))return;
+  if(!Number.isInteger(t)||!G.players[t]||!G.players[t].alive||(t===i&&rno(i)!=='Доктор')||(isMi(i)&&isMi(t))){note(i,'Так выбрать нельзя. Выбери другую цель.');REF('acts/'+id).remove();return}
+  G.night.acts[id]=1;ch=true;const r=rno(i);
+  if(isMi(i)){G.night.kill=t;G.night.killer=i;note(i,'Ты выбрал жертву: '+nm(t)+'. Итог узнаешь утром.')}
+  else if(r==='Доктор'){G.night.heal=t;note(i,'Ты защищаешь игрока '+nm(t)+'.')}
+  else if(r==='Любовница'){G.night.block=t;note(i,'Ты отвлекаешь игрока '+nm(t)+'.')}
+  else if(r==='Комиссар')note(i,G.night.block===i?'Этой ночью тебя отвлекли — проверка не удалась.':(isMi(t)?'Игрок '+nm(t)+' — МАФИЯ.':'Игрок '+nm(t)+' не является мафией.'))});
+ if(ch&&G.need.every(i=>G.night.acts[G.players[i].id])){const id=G.run;setTimeout(()=>{if(G&&G.run===id)resolveNight()},1500)}}
+function resolveNight(){
+ if(G.phase!=='night')return;G.phase='resolving';clearTimeout(G.tm);
+ let k=G.night.kill;
+ if(k!==null&&G.night.block===G.night.killer){note(G.night.killer,'Тебя отвлекли — убийство сорвалось.');k=null}
+ const di=alv().find(i=>rno(i)==='Доктор'),blk=di!==undefined&&G.night.block===di,healed=di!==undefined&&!blk&&k!==null&&G.night.heal===k;
+ if(di!==undefined&&G.night.acts[G.players[di].id])note(di,blk?'Тебя отвлекли — защита не сработала.':healed?'Ты спас игрока от смерти!':'Этой ночью твоя защита не понадобилась.');
+ let msg;
+ if(k!==null&&!healed){G.players[k].alive=false;msg='🌅 Наступает утро. Ночью убит игрок '+nm(k)+'.'}
+ else if(k!==null)msg='🌅 Наступает утро. Мафия выбрала жертву, но доктор её спас. Никто не погиб.';
+ else msg='🌅 Наступает утро. Ночь прошла тихо — никто не погиб.';
+ announce(msg);if(k!==null&&!healed)note(k,'Ты выбыл из игры, но можешь наблюдать за партией.');
+ if(checkVictory())return;startDiscussion(msg)}
+function startDiscussion(msg){
+ const id=++G.run;G.phase='discussion';G.label='День '+G.day+' — обсуждение';G.end=Date.now()+40000;pub();
+ clearInterval(G.talk);G.talk=setInterval(botTalk,7000);
+ clearTimeout(G.tm);G.tm=setTimeout(()=>{if(G&&G.run===id)startVoting()},40000)}
+function botTalk(){
+ const al=alv(),bots=al.filter(i=>G.players[i].bot);if(!bots.length)return;
+ const s=rnd(bots),t=rnd(al.filter(i=>i!==s));if(t===undefined)return;
+ const Ls=[n=>'Мне кажется, '+n+' ведёт себя странно.',n=>'Я бы проверил '+n+'.',n=>n+', почему ты молчишь?',n=>'Не доверяю '+n+'.',n=>'Пока рано делать выводы, но '+n+' подозрителен.'];
+ addChatMessage(nm(s)+': '+rnd(Ls)(nm(t)))}
+function startVoting(){
+ clearInterval(G.talk);const id=++G.run;G.phase='voting';G.label='День '+G.day+' — голосование';G.end=Date.now()+30000;
+ announce('🗳️ Время обсуждения закончилось. Голосование открывается.');
+ REF('votes').remove();G.vneed=alv().filter(i=>!G.players[i].bot);pub();
+ clearTimeout(G.tm);G.tm=setTimeout(()=>{if(G&&G.run===id)REF('votes').once('value').then(s=>{if(G&&G.run===id)resolveVote(s.val()||{})})},G.vneed.length?30000:3000)}
+function hostVotes(v){
+ if(!G||G.phase!=='voting'||!G.vneed.length)return;v=v||{};
+ if(G.vneed.every(i=>v[G.players[i].id]!==undefined)){clearTimeout(G.tm);const id=G.run;G.tm=setTimeout(()=>{if(G&&G.run===id)resolveVote(v)},800)}}
+function resolveVote(v){
+ if(G.phase!=='voting')return;G.phase='resolving';clearTimeout(G.tm);const id=G.run,al=alv(),counts={};
+ al.filter(i=>!G.players[i].bot).forEach(i=>{const t=v[G.players[i].id];if(Number.isInteger(t)&&t!==i&&G.players[t]&&G.players[t].alive)counts[t]=(counts[t]||0)+1});
+ al.filter(i=>G.players[i].bot).forEach(b=>{const c=rnd(al.filter(i=>i!==b&&!(isMi(b)&&isMi(i))));if(c!==undefined)counts[c]=(counts[c]||0)+1});
+ const vals=Object.values(counts),max=vals.length?Math.max(...vals):0,win=Object.keys(counts).filter(k=>counts[k]===max).map(Number);
+ const summary=al.map(i=>nm(i)+': '+(counts[i]||0)).join(' · ');
+ if(!vals.length||win.length!==1)announce('🗳️ Голосование завершено. Ничья — никто не выбыл. Голоса: '+summary);
+ else{G.players[win[0]].alive=false;announce('🗳️ '+nm(win[0])+' изгнан голосованием. Голоса: '+summary);note(win[0],'Ты выбыл из игры, но можешь наблюдать за партией.')}
+ if(checkVictory())return;
+ G.label='Итоги голосования';G.end=0;pub();
+ clearTimeout(G.tm);G.tm=setTimeout(()=>{if(G&&G.run===id&&G.phase==='resolving'){G.day++;beginNight()}},3000)}
+function checkVictory(){
+ const al=alv(),m=al.filter(isMi).length,t=al.length-m;
+ if(m===0){fin('Победили мирные жители! Все мафиози выбыли.');return true}
+ if(m>=t){fin('Победила мафия! Она сравнялась по числу с остальными живыми игроками.');return true}
+ return false}
+function fin(res){
+ clearTimeout(G.tm);clearInterval(G.talk);G.run++;G.phase='over';G.label='Игра окончена';G.end=0;G.res=res;
+ G.reveal=G.players.map((p,i)=>p.name+' — '+ro(i)[0]+' '+ro(i)[1]+(p.alive?'':' (выбыл)'));
+ announce('🏆 '+res);pub()}
+
+$('navGame').onclick=()=>{$('navGame').classList.add('active');$('navSettings').classList.remove('active');hide('settings');if(phaseStarted){hide('home');hide('lobby');show('game')}else if(room){hide('home');hide('game');show('lobby')}else{show('home');hide('lobby');hide('game')}window.scrollTo({top:0,behavior:'smooth'})};
+$('navSettings').onclick=()=>{$('navSettings').classList.add('active');$('navGame').classList.remove('active');hide('home');hide('lobby');hide('game');show('settings');window.scrollTo({top:0,behavior:'smooth'})};
+$('test').onclick=()=>speak('Город засыпает. Все игроки закрывают глаза. Мафия просыпается.');
+updateRoleSummary();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});</script></html>
